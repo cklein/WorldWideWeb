@@ -43,7 +43,7 @@ enum state_enum {S_text,	/* We are not in a tag				*/
 		S_tag_u, S_end_u,
 		S_tag_end,	/* We have just had "</"			*/
 		S_restoffile,
-		S_end_h, 
+		S_end_h,
 		S_title,
 		S_anchor, S_href, S_href_quoted, S_href_unquoted, S_aname,
 		S_junk_tag,	/* Ignore everything until ">"			*/
@@ -93,7 +93,7 @@ static int output_in_word;		/* Flag: Last character ouput was non-white */
 static SGML_style	Normal =
 	{ "", "<P>\n", "\t", "",
 	 "","", "", 0 ,1, 0};
-	
+
 static SGML_style	Heading[6] = {
 	{ "\n<H1>", "</H1>\n<H1>", "\t", "</H1>", "", "", "", 0, 1, 0},
 	{ "\n<H2>", "</H2>\n<H2>", "\t", "</H2>", "", "", "", 0, 1, 0},
@@ -102,11 +102,11 @@ static SGML_style	Heading[6] = {
 	{ "\n<H5>", "</H5>\n<H5>", "\t", "</H5>", "", "", "", 0, 1, 0},
 	{ "\n<H6>", "</H6>\n<H6>", "\t", "</H6>", "", "", "", 0, 1, 0}
 };
-	 
+
 static SGML_style	Glossary =	/* Large hanging indent with tab */
 	{ "\n<DL>\n<DT>", "\n<DT>", "\n<DD>", "\n</DL>\n",
 	"", "", "", 0, 1};
-	
+
 static SGML_style	listStyle  =		/* Hanging indent with tab */
 	{ "\n<UL>\n<LI>", "\n<LI>", "\t", "\n</UL>",
 	"\267\t", "\267\t", "", 0, 1, 0};
@@ -114,9 +114,9 @@ static SGML_style	listStyle  =		/* Hanging indent with tab */
 static SGML_style	addressStyle =
 	{ "\n<ADDRESS>", "<P>", "\t", "\n</ADDRESS>",
 	"", "", "", 0, 1, 0 };
-	
+
 /*	Explicit format styles:
-*/	
+*/
 static SGML_style	Example =	/* Fixed width font, at least 80 chars wide */
 	{ "\n<XMP>", "\n", "\t", "</XMP>",
 	"", "", "", 0 , 0, 1};
@@ -170,7 +170,7 @@ void get_styles()
     Example.style =		HTStyleNamed(styleSheet, "Example");
     Preformatted.style =	HTStyleNamed(styleSheet, "Example");
     Listing.style =		HTStyleNamed(styleSheet, "Listing");
-    
+
     Highlighting[0] =	HTStyleNamed(styleSheet, "Italic");
     Highlighting[1] =	HTStyleNamed(styleSheet, "Bold");
     Highlighting[2] =	HTStyleNamed(styleSheet, "Bold-Italic");
@@ -205,15 +205,15 @@ void update_style()
 {
     HTStyle * cur = current_style->style;
     HTStyle * next = next_style->style;
-    
+
     OUTPUTS(current_style->end_text);
-    
+
     if (current_style->free_format && cur && next) {	/* generate new lines */
     	int i;
 	float space = cur->spaceAfter > next->spaceBefore ?
 			cur->spaceAfter : next->spaceBefore;	/* max */
         int newlines = (space/cur->paragraph->lineHt) + 1;
-	
+
 	output_in_word = 0;
         for(i=0; i<newlines; i++) OUTPUT('\n');	/* Rather approximate! 	*/
     }
@@ -363,7 +363,7 @@ static int parse_example(SGML_style * style, char * terminator)
 	    OUTPUT(*q);		/* 	Most common 99% path  */
 #endif
 	}
-    }    
+    }
 }
 
 
@@ -398,15 +398,15 @@ static int parse_example(SGML_style * style, char * terminator)
 **	that switch to get out of the next outer one, and so on.
 */
 #ifdef NeXT
-- readSGML: (NXStream *)stream diagnostic:(int)diagnostic
+- readSGML: (NSStream *)stream diagnostic:(int)diagnostic
 #else
 int readSGML(HyperText * self, FILE * stream, int diagnostic)
 
 #endif
 #define SETSTATE(x) {state=(x); break;}
-{    
+{
     enum state_enum state = S_column_1;
-     
+
 /*	Information to be accumulated:
 */
     char title[256];			/* See <TITLE> tag. */
@@ -418,22 +418,22 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
     BOOL end_style_on_nl = NO;		/* For styles which only last a line (ugh!) */
     BOOL white_significant = NO;	/* Not free format */
 
-    
+
 /*	Set up global pointer for other routines
 */
     output_in_word = 0;		/* Flag: Last character output was non-white */
     HT = self;
-    sgmlStream = stream;	
+    sgmlStream = stream;
 
 /*	Pick up the styles we want from a local style sheet
 */
     get_styles();
     styleStack = 0;
     current_style = &Normal;
-    
+
     if (TRACE) printf("Parsing SGML stream %i\n", sgmlStream);
     START_OUTPUT;
-    set_style(Normal.style);		/* Was random! 910910 TBL */  
+    set_style(Normal.style);		/* Was random! 910910 TBL */
 
     while(!END_OF_FILE && (state!=S_done)) {
         char c = NEXT_CHAR;
@@ -445,7 +445,7 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 	if(TRACE) printf("<%c>", c);
 #endif
 	switch (state) {
-	    
+
 #ifdef REMOVE_SCRIPT
 	case S_column_1:
 	    if (c=='.') {
@@ -453,7 +453,7 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 	    }
 	    BACK_UP;
 	    SETSTATE(S_text);
-	    
+
 	case S_dot:				/* Dot in first column */
 	    if (WHITE(c)) {
 	        OUTPUT('.');
@@ -467,7 +467,7 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 		SETSTATE( (c=='\n')||(c==';') ? S_column_1
  					      : S_junk_script);
 
-#endif	    
+#endif
 	case S_word:		/* We have just had non-white characters */
 	    if (c=='<') SETSTATE(S_tag_start);
 	    if (c=='&') goto rcdata;
@@ -475,11 +475,11 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 	        OUTPUT(c);
 		break;
 	    }
-	    	    
+
 	case S_text:		/* We are not in a tag or a word */
 	    switch(c) {
 	    case '<':	SETSTATE(S_tag_start);
-		
+
 /*	Special code for CERN SGML double newline significance: ugh!  :-(
 */
 	    case '\n':
@@ -488,7 +488,7 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 		    output_in_word = 0;
 		    SETSTATE(S_text);
 		}
-		
+
 #ifdef CERN_WEIRDO				/* Obsolete 921122 */
 		if (end_style_on_nl) {
 		    end_style();
@@ -515,7 +515,7 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 		    SETSTATE(S_column_1);
 		}
 #endif
-	    
+
 	    case '\t':
 	        UPDATE_STYLE;			/* Must be in new style */
 						/* FALL THROUGH! */
@@ -523,7 +523,7 @@ int readSGML(HyperText * self, FILE * stream, int diagnostic)
 	    	OUTPUT(c);
 		output_in_word = 0;
 		SETSTATE(S_text);
-		
+
 	    default:	   				/* New word */
 
 		/* The character is non-white. Print a space if necessary. */
@@ -545,13 +545,13 @@ rcdata:
 		    SETSTATE(S_word);
 		}
 printable:
-	    	OUTPUT(c);			/* First char of new word */ 
+	    	OUTPUT(c);			/* First char of new word */
 		output_in_word = 1;
 	        SETSTATE(S_word);		/* Now take rest of word faster */
-	    
+
 	    } /* switch(c) */
 	    break;
-	    
+
 	case S_tag_start:
 	    switch (c) {
 	    case 'A':
@@ -578,14 +578,14 @@ printable:
 	    case 'U':
 	    case 'u':	SETSTATE(S_tag_u);
 	    case 'X':
-	    case 'x':	SETSTATE( check("XMP>") ? 
+	    case 'x':	SETSTATE( check("XMP>") ?
 			  parse_example(&Example, "</XMP>")
 			  : S_junk_tag);
 	    case '/':	SETSTATE( S_tag_end);
 	    default:	SETSTATE( S_junk_tag);
 	    } /*  switch on character */
 	    break;
-    
+
 	case S_tag_end:
 	    switch (c) {
 	    case 'A':
@@ -612,7 +612,7 @@ printable:
 	    default:	SETSTATE(S_junk_tag);
 	    } /*  switch on character */
 	    break;
-	
+
 	case S_junk_tag:	SETSTATE( (c=='>') ? S_text : S_junk_tag);
 
 #ifdef CERN_WEIRDO
@@ -627,7 +627,7 @@ printable:
 	    case 'S':	if (check("SINDEX")) isIndex = YES;
 	    		SETSTATE(S_junk_tag);
 	    default:	SETSTATE(S_junk_tag);
-	    }	
+	    }
 	    break;
 	case S_tag_a:
 	    switch(c) {
@@ -636,22 +636,22 @@ printable:
 		if (!check("DDRESS>")) { SETSTATE(S_junk_tag) };
 		start_style(&addressStyle);
 		SETSTATE( S_text);
-	    
+
 	    case '\n':
 	    case ' ':
 	    case '>':
 	    	reference_length = 0;
 	    	anchor_name_length = 0;
 	    	SETSTATE(S_anchor);
-	    
+
 	    } /* switch on character */
 	    break;
-	    
+
 	case S_tag_p:	if ((c==' ') || (c=='>')) {
 			    output_paragraph();
 			    SETSTATE( c=='>'? S_text : S_junk_tag);
 			}
-			
+
 			if ((c=='R') || (c=='r')) {		/* <PRE> */
 			    if (check("RE")) {
 				start_style(&Preformatted);
@@ -670,7 +670,7 @@ printable:
 			 SETSTATE(S_junk_tag);
 
 	case S_tag_lis:
-	    		SETSTATE( check("TING>") ? 
+	    		SETSTATE( check("TING>") ?
 			  parse_example(&Listing, "</LISTING>")
 			  : S_junk_tag);
 
@@ -696,7 +696,7 @@ printable:
 #endif
 	    		}
 	    		SETSTATE(S_text);
-			
+
 	    case 'E':					/* <NE */
 	    case 'e':
 	        if (check("EXTID ")) {
@@ -705,7 +705,7 @@ printable:
 		        c = NEXT_CHAR;
 			if ((c=='N') || (c=='n')) {
 			    if (!check("N = ")) {
-				if (TRACE) fprintf(stderr, 
+				if (TRACE) fprintf(stderr,
 					"HTML: Bad nextid\n");
 				SETSTATE(S_junk_tag);
 			    }
@@ -723,10 +723,10 @@ printable:
 		    }
 		}
 		SETSTATE(S_junk_tag);
-		
+
 	    } /* switch */
 	    break;
-	    
+
 /*	Parse anchor tag:
 **	----------------
 */
@@ -742,29 +742,29 @@ printable:
 		    SETSTATE( S_aname);
 		}
 	    }
-	    
+
 	    if (c=='>') {			/* Anchor tag is over */
 		/* Should use appendStartAnchor! @@@ */
 		HTStyle * style = HTStyleNew();
 	    	char * parsed_address;
 		int anchorNumber;
-		
+
 	        reference[reference_length]=0;		/* Terminate it */
 	        anchor_name[anchor_name_length]=0;	/* Terminate it */
 
 		style->anchor =
 		  *anchor_name ? [Anchor newParent:nodeAnchor tag:anchor_name]
 			      : [self anchor];
-			      
+
 		/* If next anchor number not specified, ensure it is safe */
-		
+
 		if ((anchor_name[0] == ANCHOR_ID_PREFIX)
 		&&  (sscanf(anchor_name+1, "%i", &anchorNumber) > 0))	/* numeric? */
 		 if (anchorNumber >= nextAnchorNumber)
 		  nextAnchorNumber = anchorNumber+1;		/* Prevent reuse */
-		
-		
-		[(Anchor *)style->anchor isLastChild];	/* Put in correct order */	      
+
+
+		[(Anchor *)style->anchor isLastChild];	/* Put in correct order */
 		if (*reference) {			/* Link only if href */
 		    parsed_address = HTParse(reference, [nodeAnchor address],
 		    	 PARSE_ALL);
@@ -772,7 +772,7 @@ printable:
 		    			[Anchor newAddress:parsed_address]];
 		    free(parsed_address);
 		}
-		
+
 		UPDATE_STYLE;
 		SET_STYLE(style);		/* Start anchor here */
 		free(style);
@@ -780,7 +780,7 @@ printable:
 	    }
 	    printf("SGML: Bad attribute in anchor.\n");
 	    SETSTATE( S_junk_tag);
-    
+
 	case S_href:
 	    if (c=='"') SETSTATE (S_href_quoted);
 	case S_href_unquoted:
@@ -811,7 +811,7 @@ printable:
 		anchor_name[anchor_name_length++] = c;
 	    }
 	    SETSTATE( state);
-    
+
 	case S_end_a:
 	    switch(c) {
 	    case 'd':					/* End address */
@@ -825,7 +825,7 @@ printable:
 		    [HT appendEndAnchor];
 		    SETSTATE(S_text);
 		}
-		
+
 	    default: SETSTATE(S_junk_tag);
 	    } /* switch c */
 	    break;
@@ -863,11 +863,11 @@ printable:
 	    if ((c != 'l')&&(c!='L')) SETSTATE(S_junk_tag);
 	    end_style();
 	    SETSTATE(S_junk_tag);
-	        
+
 /*	Parse highlighting and headers
 **	------------------------------
 **	@ All these formats should be nested, and should be defined by a style sheet.
-*/	
+*/
 	case S_tag_h:
 	    switch (c) {
 	    case '1':
@@ -890,15 +890,15 @@ printable:
 		case '2':
 		case '3':
 		    start_highlighting(Highlighting[c-'1']);
-		    SETSTATE( S_junk_tag);	    
-		default: SETSTATE( S_junk_tag);	    
+		    SETSTATE( S_junk_tag);
+		default: SETSTATE( S_junk_tag);
 		}
 		break;
-		    
+
 	    default: SETSTATE( S_junk_tag);
 	    } /* switch c */
 	    break;
-    
+
 	case S_end_h:
 	    switch (c) {
 	    case '1':
@@ -922,13 +922,13 @@ printable:
 		    SETSTATE( S_junk_tag);
 		default: SETSTATE( S_junk_tag);
 		} /* switch */
-		break;	    
+		break;
 
 	    default: SETSTATE( S_junk_tag);
-	    
+
 	    } /* switch c */
 	    break;
-    
+
 /*	Parse Lists, ordered and unordered
 **	----------------------------------
 **
@@ -936,13 +936,13 @@ printable:
 */
         case S_tag_o:
 	case S_tag_u:
-	    
-	    if ((c == 'l') || (c=='L')) {        
+
+	    if ((c == 'l') || (c=='L')) {
 		(void) check("L> <LI>");	/* Ignore first LI after UL */
 		start_style(&listStyle);
 	    }
 	    SETSTATE(S_text);
-	    
+
 	case S_tag_l:
 	    switch(c) {
 	    case 'I':
@@ -953,7 +953,7 @@ printable:
 		}
 		output_paragraph();
 	        SETSTATE(S_text);
-		
+
 	    default: SETSTATE(S_junk_tag);
 	    } /*switch c */
 	    break;
@@ -968,12 +968,12 @@ printable:
 */
 	case S_restoffile:
 	    switch (c) {
-	    
+
 	    case ' ':
 	    case '\n':
 	    case '\t':
 	    	break;
-	     
+
 	    case 'p':
 	    case 'P':
 	       	if (check("PLAINTEXT>")) {
@@ -982,7 +982,7 @@ printable:
 		    LOADPLAINTEXT;
 		    SETSTATE(S_done);		/* ... */
 		 }
-	     
+
 	    case 'R':
 	    case 'r':
 	       	if (check("RTF>")) {
@@ -991,10 +991,10 @@ printable:
 		    [self adjustWindow];		/* Fix scrollers */
 		    SETSTATE(S_done);		/* Inhibit RTF load */
 		 }
-	     
+
 	     }
 	     break;
-	             
+
 /*	Parse <TITLE>..</TITLE>
 */
 	case S_title:
@@ -1006,18 +1006,18 @@ printable:
 		    SETSTATE( S_text);
 		} else SETSTATE( S_junk_tag);	/* @@@ forgets < in titles! */
 	    } else {
-		if (title_length < 255) title[title_length++] = c; 
+		if (title_length < 255) title[title_length++] = c;
 		SETSTATE( state);
 	    } /* if */
 	case S_done:
 	    break;			/* Should never happen */
-	    
+
 	} /* switch state */
     } /* for loop */
 
     if ((state!=S_text) && (state != S_done))
         if(TRACE) printf("*** Unfinished SGML file: Left in state %i\n", state);
-	
+
     if (state != S_done) {
         OUTPUT('\n');	/* Ensure that the text always ends in \n for ScanALine */
         FINISH_OUTPUT;
@@ -1031,11 +1031,11 @@ printable:
 	if (TRACE) printf("HT: Left in style at end of document!\n");
 	free(N);
     }
-    
+
     [window setDocEdited:NO];
     tFlags.changeState = 0; 		/* Please notify delegate if changed */
     return self;
-    
+
 } /* readSGML:diagnostic: */
 
 
@@ -1089,7 +1089,7 @@ SGML_style * findSGML(void *para)
 	}
     }
     if (TRACE) printf("HT: Can't find SGML style!\n");
-    SGML_gen_errors++; 
+    SGML_gen_errors++;
     return &Normal;
 }
 
@@ -1100,11 +1100,11 @@ SGML_style * findSGML(void *para)
 void change_run(NXRun *last, NXRun *r)
 {
     int chars_left = r->chars;
-       
+
     if (r->info != last->info) {			/* End anchor */
 	if (last->info) NXPrintf(sgmlStream, "</A>");
     }
-    
+
     if (r->paraStyle != last->paraStyle)
      if (last->paraStyle) {				/* End paragraph */
 	if (currentSGML) NXPrintf(sgmlStream, "%s", currentSGML->end_tag);
@@ -1112,7 +1112,7 @@ void change_run(NXRun *last, NXRun *r)
 	lineLength = 0;	 /* At column 1 */
     }
 
-    
+
     if (r->paraStyle != last->paraStyle) {		/* Start paragraph */
 	currentSGML = findSGML(r->paraStyle);
 	if (currentSGML) {
@@ -1124,10 +1124,10 @@ void change_run(NXRun *last, NXRun *r)
 	    }
 	    NXPrintf(sgmlStream, "%s", currentSGML->start_tag);
 	    prefix = currentSGML->start_text;
-	} 
+	}
 	SGML_gen_newlines=0;				/* Cancel  */
     }
-    
+
     if (r->info != last->info) {			/* Start anchor */
 
 	if (SGML_gen_newlines) {	/* Got anchor, need paragraph separator */
@@ -1171,7 +1171,7 @@ void change_run(NXRun *last, NXRun *r)
 **	though this is not guarranteed.
 */
     {
-	while (chars_left) {	
+	while (chars_left) {
 	    char c = NEXT_TEXT_CHAR;
 	    chars_left--;
 	    if (prefix) {
@@ -1187,7 +1187,7 @@ void change_run(NXRun *last, NXRun *r)
 		    }
 		prefix=0;				/* Prefix is over */
 	    }
-	    
+
 	    if (c=='\n') {				/* Paragraph Marks:	*/
 		if (currentSGML->free_format) {
 		    SGML_gen_newlines++;		/* Just flag it */
@@ -1196,7 +1196,7 @@ void change_run(NXRun *last, NXRun *r)
 		    NXPrintf(sgmlStream, "%s", currentSGML->paragraph_tag);
 		}
 		lineLength = 0;	 /* At column 1 */
-		
+
 	    } else {					/* Not newline */
 
 		if (SGML_gen_newlines) {/* Got text, need paragraph separator */
@@ -1215,7 +1215,7 @@ void change_run(NXRun *last, NXRun *r)
 			    c = '\n';
 			    lineLength = 0;
 		    }
-		    
+
 		    if (currentSGML->litteral) {
 		        NXPrintf(sgmlStream, "%c", c);
 		    } else {
@@ -1235,30 +1235,30 @@ void change_run(NXRun *last, NXRun *r)
 
 /*	This is the body of the SGML output method.
 */
-- writeSGML:(NXStream *) stream relativeTo:(const char *)aName
+- writeSGML:(NSStream *) stream relativeTo:(const char *)aName
 {
     NXRun * r = theRuns->runs;
     int sor;				/* Character position of start of run */
     NXRun dummy;
-    
+
     dummy.paraStyle = 0;
     dummy.info = 0;
     dummy.chars = 0;
-    
-    SGML_gen_newlines=0;		/* Number of newlines read but not inserted */    
+
+    SGML_gen_newlines=0;		/* Number of newlines read but not inserted */
     HT = self;
     saveName = aName;
     sgmlStream = stream;
     SGML_gen_errors = 0;
     currentSGML = 0;
     prefix = 0;				/* No prefix to junk */
-    
+
     START_INPUT;
     lineLength = 0;			/* Starting in column 1 */
-    		
+
     NXPrintf(stream, "<HEADER>\n");
     NXPrintf(stream, "<TITLE>%s</TITLE>", [window title]);
-    
+
     if (nextAnchorNumber) NXPrintf(stream, "\n<NEXTID N=\"%i\">\n",
 	 nextAnchorNumber);
     NXPrintf(stream, "</HEADER>\n");
@@ -1267,7 +1267,7 @@ void change_run(NXRun *last, NXRun *r)
 /*	Change style tags etc
 */
     change_run(&dummy, r);			/* Start first run */
-    
+
     for (sor=r++->chars; sor<textLength; sor=sor+(r++)->chars)  {
         if (TRACE) printf("%4i:  %i chars in run %3i.\n",
 			sor, r->chars, r-theRuns->runs);
@@ -1278,5 +1278,5 @@ void change_run(NXRun *last, NXRun *r)
     tFlags.changeState = 0; 		/* Please notify delegate if changed */
     NXPrintf(stream, "</BODY>\n");
 
-    return (SGML_gen_errors) ? nil : self;    
+    return (SGML_gen_errors) ? nil : self;
 }

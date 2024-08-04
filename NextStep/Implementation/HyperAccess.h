@@ -9,7 +9,7 @@
 #import "Anchor.h"
 #import "HyperText.h"
 
-@interface HyperAccess:Object
+@interface HyperAccess:NSObject
 
 //	Target variables for interface builder hookups:
 
@@ -20,7 +20,7 @@
     id	titleString;
     id	addressString;
     id	contentSearch;
-    
+
 }
 
 //	Interface builder initialisation methods:

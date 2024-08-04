@@ -31,28 +31,28 @@
 
 //	Open or search  by name
 //	-----------------------
-	
+
 - accessName:(const char *)arg
 	anchor:(Anchor *)anAnchor
 	diagnostic:(int)diagnostic
 {
     HyperText *	HT;			// the new hypertext
-    NXStream * sgmlStream;		// Input stream for marked up hypertext
-    int s;				// Socket number for returned data 
+    NSStream * sgmlStream;		// Input stream for marked up hypertext
+    int s;				// Socket number for returned data
 
 /* Get node name:
 */
-    
+
 //	Make a hypertext object with an anchor list.
-        
+
     HT = [HyperText newAnchor:anAnchor Server:self];
 
-    [HT setupWindow];			
+    [HT setupWindow];
     [[HT window]setTitle:"Connecting..."];	/* Tell user something's happening */
     [HT setEditable:NO];			/* This is read-only data */
 
 //	Now, let's get a stream setup up from the server for the sgml data:
-        
+
     s = HTTP_Get(arg);
     if (s<0) return nil;	/* Failed .. error will be reported by HTTP_get */
     sgmlStream = NXOpenFile(s, NX_READONLY);
@@ -65,10 +65,10 @@
 //	Now we parse the SGML
 
     [[HT window]setTitle:"Loading..."];	/* Tell user something's happening */
-    [HT readSGML:sgmlStream diagnostic:diagnostic];    
-    
+    [HT readSGML:sgmlStream diagnostic:diagnostic];
+
 //	Clean up now it's on the screen:
-    
+
     if (TRACE) printf("Closing streams\n");
     NXClose(sgmlStream);
     close(s);

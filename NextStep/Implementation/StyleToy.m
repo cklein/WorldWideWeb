@@ -75,27 +75,27 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 {
     if(style->name) [NameForm setStringValue:style->name at:0];
     else [NameForm setStringValue:"" at:0];
-    
+
     if(style->SGMLTag) [ParameterForm setStringValue:style->SGMLTag at:SGMLTAG_FIELD];
     else [ParameterForm setStringValue:"" at:SGMLTAG_FIELD];
-    
+
     [ParameterForm setStringValue:[style->font name] at:FONT_NAME_FIELD];
 
     [ParameterForm setFloatValue:style->fontSize at:FONT_SIZE_FIELD];
-    
+
     if(style->paragraph) {
     	char tabstring[255];
 	int i;
        	[ParameterForm setFloatValue:style->paragraph->indent1st
        				at:FIRST_INDENT_FIELD];
-        [ParameterForm setFloatValue:style->paragraph->indent2nd 
+        [ParameterForm setFloatValue:style->paragraph->indent2nd
 				at:SECOND_INDENT_FIELD];
 	tabstring[0]=0;
 	for(i=0; i < style->paragraph->numTabs; i++) {
 	    sprintf(tabstring+strlen(tabstring), "%.0f ", style->paragraph->tabs[i].x);
 	}
 	[TabForm setStringValue:tabstring at:0];
-    }     
+    }
     return self;
 }
 
@@ -108,7 +108,7 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 {
     char * name = 0;
     char * stripped;
-    
+
     style->fontSize=[ParameterForm floatValueAt:FONT_SIZE_FIELD];
     StrAllocCopy(name, [NameForm stringValueAt:0]);
     stripped = HTStrip(name);
@@ -119,7 +119,7 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
     }
     free(name);
     name = 0;
-    
+
     StrAllocCopy(name, [ParameterForm stringValueAt:SGMLTAG_FIELD]);
     stripped = HTStrip(name);
     if (*stripped) {
@@ -127,7 +127,7 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
     }
     free(name);
     name = 0;
-    
+
     if (!style->paragraph) style->paragraph = malloc(sizeof(*(style->paragraph)));
     style->paragraph->indent1st = [ParameterForm floatValueAt: FIRST_INDENT_FIELD];
     style->paragraph->indent2nd = [ParameterForm floatValueAt: SECOND_INDENT_FIELD];
@@ -143,8 +143,8 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 //	old ones which are not redefined.
 
 - open:sender
-{  
-    NXStream * s;			//	The file stream
+{
+    NSStream * s;			//	The file stream
     const char * filename;		//	The name of the file
     char *typelist[2] = {"style",(char *)0};	//	Extension must be ".style."
 
@@ -152,7 +152,7 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
     	open_panel = [OpenPanel new];
         [open_panel allowMultipleFiles:NO];
     }
-    
+
     if (![open_panel runModalForTypes:typelist]) {
     	if (TRACE) printf("No file selected.\n");
 	return nil;
@@ -188,8 +188,8 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 
 - loadDefaultStyleSheet
 {
-    NXStream * stream;
-    
+    NSStream * stream;
+
     if (!styleSheet) styleSheet = HTStyleSheetNew();
     styleSheet->name = malloc(strlen(appDirectory)+13+1);
     strcpy(styleSheet->name, appDirectory);
@@ -212,7 +212,7 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 	if (!stream)
 	    printf("Couldn't open %s, errno=%i\n", name, errno);
     }
-    
+
     if (stream) {
 	(void)HTStyleSheetRead(styleSheet, stream);
 	NXCloseMemory(stream, NX_FREEBUFFER);
@@ -227,8 +227,8 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 //	--------------------------
 
 - saveAs:sender
-{  
-    NXStream * s;			//	The file stream
+{
+    NSStream * s;			//	The file stream
     char * slash;
     int status;
     char * suggestion=0;		//	The name of the file to suggest
@@ -237,7 +237,7 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
     if (!save_panel) {
         save_panel = [SavePanel new];	//	Keep between invocations
     }
-    
+
     StrAllocCopy(suggestion,styleSheet->name);
     slash = rindex(suggestion, '/');	//	Point to last slash
     if (slash) {
@@ -247,12 +247,12 @@ static SavePanel * save_panel;		/* Keep a Save panel too */
 	status = [save_panel runModalForDirectory:"." file:suggestion];
     }
     free(suggestion);
-    
+
     if (!status) {
     	if (TRACE) printf("No file selected.\n");
 	return nil;
     }
-    
+
     filename = [save_panel filename];
     s = NXMapFile(filename, NX_WRITEONLY);
     if (!s) {

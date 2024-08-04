@@ -17,12 +17,12 @@
 /*	Debug message control.
 */
 #ifdef DEBUG
-	
+
 #ifndef STDIO_H
 #include <stdio.h>
 #define STDIO_H
 #endif
-	
+
 #define TRACE (WWW_TraceFlag)
 #define PROGRESS(str) printf(str)
 	extern int WWW_TraceFlag;
@@ -117,8 +117,8 @@
 		t a; u b; v c; w d; x e; y f; z g; s h; r i;
 #define ARGS10(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h,r,i,q,j) (a,b,c,d,e,f,g,h,i,j) \
 		t a; u b; v c; w d; x e; y f; z g; s h; r i q j;
-		
-	
+
+
 #endif /* __STDC__ (ANSI) */
 
 #ifndef NULL
@@ -141,6 +141,7 @@
 #define BOOLEAN_DEFINED
 #endif
 
+/*
 #ifndef BOOL
 #define BOOL BOOLEAN
 #endif
@@ -148,6 +149,7 @@
 #define YES (BOOLEAN)1
 #define NO (BOOLEAN)0
 #endif
+*/
 
 #ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))

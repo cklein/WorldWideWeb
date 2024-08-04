@@ -6,13 +6,13 @@
 #import "Anchor.h"
 #import "HyperAccess.h"
 
-@interface TextToy:Object
+@interface TextToy:NSObject
 {
     id	SearchWindow;
-    
+
     Anchor 	*StartAnchor;
     Anchor	*EndAnchor;
-    
+
     List * accesses;
 }
 

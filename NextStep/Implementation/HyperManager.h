@@ -13,7 +13,7 @@
 @interface HyperManager : HyperAccess
 
 {
-	List * accesses;
+	NSArray * accesses;
 }
 
 - traceOn:sender;		// 	Diagnostics: Enable output to console

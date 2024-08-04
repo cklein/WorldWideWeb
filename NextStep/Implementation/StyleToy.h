@@ -3,7 +3,7 @@
 
 #import <objc/Object.h>
 
-@interface StyleToy:Object
+@interface StyleToy:NSObject
 {
     id	TabForm;
     id	ParameterForm;

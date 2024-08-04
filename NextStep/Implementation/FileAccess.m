@@ -55,8 +55,8 @@ extern char * appDirectory;		/* Pointer to directory for application */
 
 - save: (HyperText *)HT inFile:(const char *)filename format:(int)format
 {
-    NXStream * s;				//	The file stream
-    
+    NSStream * s;				//	The file stream
+
     s = NXOpenMemory(NULL, 0, NX_WRITEONLY);
 
     if (format==WWW_HTML) {
@@ -66,11 +66,11 @@ extern char * appDirectory;		/* Pointer to directory for application */
     }
     else if (format==WWW_RICHTEXT) [HT writeRichText:s];
     else if (format==WWW_PLAINTEXT || format==WWW_SOURCE) [HT writeText:s];
-    else fprintf(stderr, "HT/File: Unknown format!\n"); 
-    
+    else fprintf(stderr, "HT/File: Unknown format!\n");
+
     if (TRACE) printf("HT file: %li bytes in file `%s' format %i.\n",
     	NXTell(s), filename, format);
-	
+
     NXFlush(s);			/* Try to get over missing end */
     NXSaveToFile(s, filename);
     NXCloseMemory(s, NX_FREEBUFFER);
@@ -94,18 +94,18 @@ const char * ask_name(HyperText * hint, int format)
     char * 		slash;
     int			status;
     static SavePanel * 	save_panel;		/* Keep a Save panel alive  */
-    
+
     if (!hint) return 0;
     if (!save_panel) {
         save_panel = [SavePanel new];	//	Keep between invocations
     }
-    
+
     if (format==WWW_HTML) [save_panel setRequiredFileType: "html"];
     else if (format==WWW_RICHTEXT) [save_panel setRequiredFileType: "rtf"];
     else if (format==WWW_PLAINTEXT) [save_panel setRequiredFileType: "txt"];
     else if (format==WWW_POSTSCRIPT) [save_panel setRequiredFileType: "ps"];
     else [save_panel setRequiredFileType: ""];
-    
+
     suggestion = HTLocalName([[hint nodeAnchor]address]);
     slash = strrchr(suggestion, '/');	//	Point to last slash
     if (slash) {
@@ -116,7 +116,7 @@ const char * ask_name(HyperText * hint, int format)
 	status = [save_panel runModalForDirectory:"." file:suggestion];
     }
     free(suggestion);
-    
+
     if (!status) {
     	if (TRACE) printf("Save cancelled.\n");
 	return 0;
@@ -132,17 +132,17 @@ const char * ask_name(HyperText * hint, int format)
 //	hint	is a node to be used for a suggested name.
 //
 - saveIn:(int)format like:(HyperText *)hint
-{  
+{
     const char * filename;		//	The name of the file selected
     HyperText * HT;
-    
+
     HT = THIS_TEXT;
     if (!HT) return HT;			//	No main window!
-    
+
     filename = ask_name(HT, format);
     if (!filename) return nil;		//	Save clancelled.
-    
-    return [self save:HT inFile:filename format:format]; 
+
+    return [self save:HT inFile:filename format:format];
 }
 
 //	Save as an HTML file	using save panel
@@ -177,7 +177,7 @@ const char * ask_name(HyperText * hint, int format)
 //	(which may be NFS mounted) truncate filenames and can chop the suffix off!
 //
 - saveNode:(HyperText *) HT
-{  
+{
     char * filename;		//	The name chosen
     id		status;
     FILE * fp;
@@ -186,7 +186,7 @@ const char * ask_name(HyperText * hint, int format)
     filename = HTLocalName(addr);
 
 /*	Take a backup before we do anything silly
-*/        
+*/
     if (takeBackup) {
     	char * backup_filename = 0;
 	char * p = backup_filename;
@@ -199,7 +199,7 @@ const char * ask_name(HyperText * hint, int format)
 	    }
 	    p[1] = p[0];	/* Move up everything to the right of it */
 	}
-	
+
 	if (fp=fopen(filename, "r")) {			/* File exists */
 	    fclose(fp);
 	    if (TRACE) printf("File `%s' exists\n", filename);
@@ -216,8 +216,8 @@ const char * ask_name(HyperText * hint, int format)
 	    }
 	}
     	free(backup_filename);
-    } /* if take backup */    
-    
+    } /* if take backup */
+
 
     status = [self save:HT inFile:filename format:[HT format]];
     if (status) [[HT window] setDocEdited: NO];
@@ -234,12 +234,12 @@ const char * ask_name(HyperText * hint, int format)
 //
 //	Returns	If successful, the anchor of the node loaded or found.
 //		If failed, nil.
- 
+
 - loadAnchor: (Anchor *) anAnchor Diagnostic:(int)diagnostic
 {
     const char * addr = [anAnchor address];
-    
-    NXStream * s;			//	The file stream
+
+    NSStream * s;			//	The file stream
     HyperText * HT;			//	The new node
     char * filename;			//	The name of the file
     char * newname =  0;		//	The simplified name
@@ -254,13 +254,13 @@ const char * ask_name(HyperText * hint, int format)
     [anAnchor setAddress:newname];
     filename = HTLocalName(newname);
     addr = [anAnchor address];
-	
+
     if ([anAnchor node]) {
         if (TRACE) printf("Anchor %p already has a node\n", anAnchor);
-	
+
     } else {
 	s = NXMapFile(filename, NX_READONLY);	// Map file into memory
-	
+
 	if (!s) {
 	    if (TRACE) printf("Could not open file `%s', errno=%i.\n",
 		    filename, errno);
@@ -269,7 +269,7 @@ const char * ask_name(HyperText * hint, int format)
 	        s = NXOpenFile(file_number, NX_READONLY);
 	    }
 	}
-	
+
 	if (!s) {
 	    if (TRACE) printf("Could not open `%s' with FTP either.\n",
 		    newname);
@@ -284,54 +284,54 @@ const char * ask_name(HyperText * hint, int format)
 
 
 //	For unrecognised types, open in the Workspace:
-	
+
 	format = HTFileFormat(filename);
 	if (format == WWW_INVALID) {
-	        
+
 	    char command[255];			/* Open in the workspace */
 	    sprintf(command, "open %s", filename);
 	    system(command);
-	
+
 	} else {	/* Known format */
-	
+
 //	Make the new node:
 
 	    HT = [HyperText newAnchor:anAnchor Server:self];
-	    [HT setupWindow];			
+	    [HT setupWindow];
 	    [[HT window]setTitle:filename];	 // Show something's happening
 
 	    if (file_number<0)
 	        [HT setEditable:HTEditable(filename)]; // This is editable?
 	    else
 	        [HT setEditable: NO];			// AFTP data.
-		
+
 	    switch(format) {
 	    case WWW_HTML:
 			if (diagnostic==2) {
 			    [HT readText:s];
-			    [HT setFormat: WWW_SOURCE]; 
-			} else  {  
+			    [HT setFormat: WWW_SOURCE];
+			} else  {
 			    [HT readSGML:s diagnostic:diagnostic];
 			}
 			break;
-			
-	    case WWW_RICHTEXT:   
+
+	    case WWW_RICHTEXT:
 			if (diagnostic > 0) {
 			    [HT readText:s];
-			    [HT setFormat: WWW_SOURCE]; 
-			} else {   
+			    [HT setFormat: WWW_SOURCE];
+			} else {
 			    [HT readRichText:s];
 			}
 			break;
-			
+
 	    case WWW_PLAINTEXT:
 			[HT readText:s];
     			break;
 	    }
 	}
-	
+
 //	Clean up now it's on the screen:
-	
+
 	if (TRACE) printf("Closing file stream\n");
 	if (file_number>=0) {
 	    NXClose(s);
@@ -339,7 +339,7 @@ const char * ask_name(HyperText * hint, int format)
 	} else {
 	    NXCloseMemory(s, NX_FREEBUFFER);
 	}
-	
+
     } /* If anAnchor not loaded before */
 
     free(filename);
@@ -381,7 +381,7 @@ const char * existing_filename()
 
 
 //	Get The Filename from the User
-    
+
     if (!openPanel) {
     	openPanel = [OpenPanel new];
     	[openPanel allowMultipleFiles:NO];
@@ -426,7 +426,7 @@ const char * existing_filename()
     	char * node_address = WWW_nameOfFile(filename);
     	Anchor * a =  [Anchor newAddress:node_address];
 	free(node_address);
-	
+
 	return [THIS_TEXT linkSelTo:a];
     }
     return nil;
@@ -442,7 +442,7 @@ const char * existing_filename()
 
 - openDiagnostic:(int)diagnostic
 {
-    
+
     const char * filename = existing_filename();
 
     if (!filename) {
@@ -474,7 +474,7 @@ const char * existing_filename()
     Anchor * a;
     char name[256];
     char template[256];
-    
+
     if (getenv("HOME")) {
 	int status;
 	struct stat buf;			/* status buffer */
@@ -496,7 +496,7 @@ const char * existing_filename()
     strcat(template, filename);
     a = [self openFile:template diagnostic:diagnostic];
     if (!a) return nil;
-    
+
     [a setAddress:name];		/* For later save back */
     [[a node] setEditable:YES];		/* This is editable data? */
     if ([a node]) [a select];		/* Bring to front */
@@ -508,7 +508,7 @@ const char * existing_filename()
 //	-------
 //
 //	This accesses the default page of text for the user or, failing that,
-//	for the system. 
+//	for the system.
 //
 - goHome:sender
 {
@@ -530,19 +530,19 @@ const char * existing_filename()
     Anchor *	a;			//	The new anchor
     const char * filename;		//	The name of the file selected
     HyperText * HT;			//	The new hypertext
-    
+
     if (!hint) return nil;		//	No main window!
 
     a = [self openMy:"blank.html" diagnostic:0];
     if (!a) return nil;			//	Couldn't find blank node
-    
+
     [a select];
     HT = [a node];
     if (!HT) return HT;			//	No node?!
-    
+
     filename = ask_name(hint, WWW_HTML);
     if (!filename) return nil;		//	Save cancelled.
-    
+
     node_address = WWW_nameOfFile(filename);
     [a setAddress:node_address];	// 	Adopt new address as node name
 
@@ -575,15 +575,15 @@ const char * existing_filename()
 	    sprintf(title, "%s -- %s", pTitle, pDir);
 	    [HT setTitle:title];		/* Default title is filename */
 	} else {
-	    [HT setTitle:pTitle];    
+	    [HT setTitle:pTitle];
 	}
     }
-    
+
     free(node_address);
-    
-    status = [self save:HT inFile:filename format:WWW_HTML]; 
+
+    status = [self save:HT inFile:filename format:WWW_HTML];
     if (!status) return nil;		//	Save failed!
-    
+
     [[a node] setEditable:YES];		// This is editable data.
 
     return a;
@@ -598,10 +598,10 @@ const char * existing_filename()
     HyperText * HT = THIS_TEXT;
     Anchor * a;
     if (![HT isEditable]) return nil;		/* Won't be able to link to it */
-    
+
     a = [self makeNew:sender];	/* Make the new node */
     if (!a) return nil;
-    
+
     return [HT linkSelTo:a];			/* Link the selection to it */
 }
 

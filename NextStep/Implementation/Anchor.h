@@ -10,23 +10,23 @@
 #import <appkit/appkit.h>
 
 //			Main definition of anchor:
-//			========================== 
+//			==========================
 
-@interface Anchor:Object
+@interface Anchor:NSObject
 {
     id		Node;		// The node within which this is an anchor
     				/* (HyperText *) */
 				// If not a subanchor
     Anchor *	parent;		// If this is a subanchor
-    List *	children;	// If this has subanchors, these are they.
-       
+    NSMutableArray *	children;	// If this has subanchors, these are they.
+
 //	Information about this anchor:
 
     char * 	Address;	// The address of this anchor
 
 //	Generated locally, not archived:
 
-    List *	Sources;	// A list of anchors pointing to this
+    NSMutableArray *	Sources;	// A list of anchors pointing to this
     id		DestAnchor;	// The anchor, if loaded, to which this leads
 }
 
@@ -46,7 +46,7 @@
 - setAddress: (const char *) ref_string;
 - select;			// Load if nec, select and bring to front
 - selectDiagnostic:(int)diag;	// Same with source display option
-- isLastChild;			// Move it in the list of children
+- (void) isLastChild;			// Move it in the list of children
 - (BOOL)follow;			// Follow  link if we can, return "can we?"
 - (void) linkTo:(Anchor *)destination;
 - node;				// Return the node in which the anchor sits

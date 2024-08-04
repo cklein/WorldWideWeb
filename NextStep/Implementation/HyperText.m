@@ -62,7 +62,7 @@ static float page_width()
     PrintInfo * pi = [NXApp printInfo];			// Page layout details
     NXCoord topMargin, bottomMargin, leftMargin, rightMargin;
     const NXRect * paper = [pi paperRect];		//	In points
-    
+
     [pi getMarginLeft:&leftMargin right:&rightMargin
     			top:&topMargin bottom:&bottomMargin];	/* In points */
     return (paper->size.width - leftMargin - rightMargin);
@@ -81,7 +81,7 @@ static float page_width()
 + newAnchor:(Anchor *)anAnchor Server:(id)aServer
 {
     NXRect aFrame = {{0.0, 0.0}, {page_width(), NICE_HEIGHT}};
-    
+
     self = [super newFrame:&aFrame];
     if (TRACE) printf("New node, server is %i\n", aServer);
 
@@ -107,7 +107,7 @@ static float page_width()
 - free
 {
     slot[slotNumber] = 0;	//	Allow slot to be reused
-    [nodeAnchor setNode:nil];	// 	Invalidate the node    
+    [nodeAnchor setNode:nil];	// 	Invalidate the node
     return [super free];
 }
 
@@ -130,15 +130,15 @@ static float page_width()
     int sob=0;				/* Start of text block being scanned */
     NXRun * r = theRuns->runs;
     NXTextBlock * block = firstTextBlock;
-    
+
     printf("Hypertext %i, selected(%i,%i)", self, sp0.cp, spN.cp);
     if (delegate) printf(", has delegate");
     printf(".\n");
-    
+
     printf("    Frame is at (%f, %f, size is (%f, %f)\n",
     	frame.origin.x, frame.origin.y,
     	frame.size.width, frame.size.height);
-    
+
     printf("    Text blocks and runs up to character %i:\n", sp0.cp);
     for (pos = 0; pos<=sp0.cp; pos = pos+((r++)->chars)) {
 	while(sob <= pos) {
@@ -198,18 +198,18 @@ static float page_width()
     NXRect old_scroll_frame;
     NXSize size;
     BOOL scroll_X, scroll_Y;			// Do we need scrollers?
-    
+
     ScrollView* scrollview = [window contentView];// Pick up id of ScrollView
     float paperWidth = page_width();		// Get page layout width
-    
-    
+
+
     [window disableFlushWindow];	// Prevent flashes
-    
+
     [self setVertResizable:YES];	// Can change size automatically
     [self setHorizResizable:tFlags.monoFont];
     [self calcLine];			// Wrap text to current text size
     [self sizeToFit];			// Reduce size if possible.
-    
+
     if (maxY > MAX_HEIGHT) {
     	scroll_Y = YES;
         size.height = NICE_HEIGHT;
@@ -223,7 +223,7 @@ static float page_width()
 	[self setNoWrap];
     } else {
     	scroll_X = NO;
-        [self setCharWrap:NO];				// Word wrap please 
+        [self setCharWrap:NO];				// Word wrap please
     }
     if (maxX > MAX_WIDTH) {
     	size.width = MAX_WIDTH;
@@ -250,7 +250,7 @@ static float page_width()
 			horizScroller:	scroll_X
 			vertScroller:	scroll_Y
 			borderType: 	NX_LINE];
-			
+
     [scrollview setVertScrollerRequired:scroll_Y];
     [scrollview setHorizScrollerRequired:scroll_X];
 
@@ -260,10 +260,10 @@ static float page_width()
     if ( (old_scroll_frame.size.width != scroll_frame.size.width)
        ||(old_scroll_frame.size.height != scroll_frame.size.height)) {
 
-				
+
 // Now we want to leave the top left corner of the window unmoved:
 
-#ifdef OLD_METHOD	
+#ifdef OLD_METHOD
         NXRect oldframe;
 	[window getFrame:&oldframe];
     	[window sizeWindow:scroll_frame.size.width:scroll_frame.size.height];
@@ -281,16 +281,16 @@ static float page_width()
 		style:NX_TITLEDSTYLE];	// Doesn't allow space for resize bar
 	newFrame.origin.y = newFrame.origin.y - 9.0;
 	newFrame.size.height = newFrame.size.height + 9.0; // For resize bar
-	[window placeWindow:&newFrame];	
+	[window placeWindow:&newFrame];
 #endif
     }
-    
+
 #ifdef VERSION_1_STRANGENESS
 //	In version 2, the format of the last run is overwritten with the format
 //	of the preceding run!
     {
       NXRect frm;		/* Try this to get over "text strangeness" */
-      [self getFrame:&frm];      
+      [self getFrame:&frm];
       [self renewRuns:NULL text:NULL frame:&frm tag:0];
     }
 #endif
@@ -298,7 +298,7 @@ static float page_width()
     [self calcLine];		/* Prevent messy screen */
     [window display];		/* Ought to clean it up */
     return self;
-    
+
 } /* adjustWindow */
 
 
@@ -310,10 +310,10 @@ static float page_width()
     NXRect scroll_frame;				// Calculated later
     NXSize min_size = {300.0,200.0};			// Minimum size of text
     NXSize max_size = {1.0e30,1.0e30};			// Maximum size of text
-   
+
     ScrollView * scrollview;
     NXSize nice_size = { 0.0, NICE_HEIGHT };		// Guess height
-        
+
     nice_size.width = page_width();
     [ScrollView getFrameSize:&scroll_frame.size
     			forContentSize: &nice_size
@@ -332,25 +332,25 @@ static float page_width()
 	scroll_frame.origin.y = 185 - (slotNumber % 10)   * 20
 				    - ((slotNumber/10)%3)*  3;
      }
-     
+
  //	Build a window around the text in order to display it.
 
-#define NX_ALLBUTTONS 7  // Fudge -- the followin methos is obsolete in 3.0:    
+#define NX_ALLBUTTONS 7  // Fudge -- the followin methos is obsolete in 3.0:
     window = [Window newContent:		&scroll_frame
     				style:		NX_TITLEDSTYLE
 				backing: 	NX_BUFFERED
 				buttonMask:	NX_ALLBUTTONS
-				defer:		NO];		// display now				
+				defer:		NO];		// display now
     [window setDelegate:self];			// Get closure warning
     [window makeKeyAndOrderFront:self];		// Make it visible
     [window setBackgroundGray: 1.0];		// White seems to be necessary.
-    
+
     scrollview = [ScrollView newFrame:&scroll_frame];
     [scrollview setVertScrollerRequired:YES];
     [scrollview setHorizScrollerRequired:NO];		// Guess.
     [[window setContentView:scrollview] free]; 	// Free old view, size new one.
 
-						
+
     [scrollview setDocView:self];
     [self setOpaque:YES];			// Suggested in the book
     [self setVertResizable:YES];		// Changes size automatically
@@ -397,8 +397,8 @@ static float page_width()
     int sor;
     NXRun *r, *s, *e;		/* Scan, Start and end runs */
     Anchor * a;
-    
-    
+
+
     for (sor = 0, s=theRuns->runs;
     	sor+s->chars<=sp0.cp;
     	sor = sor+((s++)->chars)) ;
@@ -421,10 +421,10 @@ static float page_width()
 {
     Anchor * a;
     HTStyle * style = HTStyleNew();
-    
+
     a = [self anchorSelected];
     if (a) return a;			/* User asked for existing one */
-    
+
     if ([self isEditable]) [window setDocEdited:YES];
     else return nil;
 
@@ -444,12 +444,12 @@ static float page_width()
 {
     Anchor * a;
     HTStyle * style = HTStyleNew();
-    
+
     if (!anAnchor) return nil;			/* Anchor must exist */
-    
+
     if ([self isEditable]) [window setDocEdited:YES];
     else return nil;
-    
+
     a = [self anchorSelected];
     if (!a) {
 	a = [self anchor];
@@ -477,10 +477,10 @@ static float page_width()
 - unlinkSelection
 {
     HTStyle * style = HTStyleNew();
-    
+
     if ([self isEditable]) [window setDocEdited:YES];
     else return nil;
-    
+
     style->anchor = CLEAR_POINTER;
     [self applyStyle:style];
     free(style);
@@ -491,7 +491,7 @@ static float page_width()
 - (Anchor *) referenceAll
 {
     return nodeAnchor;	// Just return the same one each time
-    
+
 }
 
 
@@ -509,7 +509,7 @@ static float page_width()
     for (sor=0, s=theRuns->runs; s<limit; sor = sor+(s++)->chars) {
         if (s->info == (void *)anchor){
 		start = sor;
-		
+
 	        for (e=s; (e < limit)
 				&&((e+1)->info == (void*)anchor);
 			sor = sor+(e++)->chars);
@@ -539,7 +539,7 @@ static float page_width()
     NXRun *r, *s, *e;		/* Scan, Start and end runs */
     Anchor * a;
     int startPos, endPos;
-    
+
     for (sor = 0, s=theRuns->runs;
     	sor+s->chars<=sp0.cp;
     	sor = sor+((s++)->chars)) ;
@@ -555,7 +555,7 @@ static float page_width()
         if (TRACE) printf("HyperText: No anchor selected.\n");
 	return nil;
     }
-    
+
 //	Extend/reduce selection to entire anchor
 
     {
@@ -580,9 +580,9 @@ static float page_width()
     Anchor * a = [self selectedLink];
 
     if (!a) return a;		// No link selected
-   
+
     if ([a follow]) return a;	// Try to follow link
-    
+
     if (TRACE) printf("HyperText: Can't follow anchor.\n");
     return a;			// ... but we did highlight it.
 }
@@ -631,11 +631,11 @@ static void apply(HTStyle * style, NXRun * r)
     if (style->anchor) {
 	r->info = (style->anchor == CLEAR_POINTER) ? 0 : (style->anchor);
     }
-    
-    
+
+
     if (style->textGray>=0)
     	r->textGray = style->textGray;
-	
+
     r->rFlags.underline = NO;
     if (r->info) {
 //    	r->textGray = 0.166666666;		/* Slightly grey - horrid */
@@ -645,7 +645,7 @@ static void apply(HTStyle * style, NXRun * r)
 	}
     }
     r->rFlags.dummy = (r->info != 0);		/* Keep track for typingRun */
-    
+
     if (style->textRGBColor>=0)
     	r->textRGBColor = style->textRGBColor;
 }
@@ -682,7 +682,7 @@ static BOOL willChange(HTStyle * style, NXRun *r)
     NXRun * r = theRuns->runs;
     int sor;
     for (sor=0; sor<textLength; r++) {
-        if (r->paraStyle == style->paragraph) 
+        if (r->paraStyle == style->paragraph)
 	    apply(style, r);
         sor = sor+r->chars;
     }
@@ -701,7 +701,7 @@ static BOOL willChange(HTStyle * style, NXRun *r)
     NXRun * r = theRuns->runs;
     int sor;
     for (sor=0; sor<textLength; r++) {
-        if (r->info == (void *)anchor) 
+        if (r->info == (void *)anchor)
 	    r->info = 0;
 	    r->textGray =  NX_BLACK;
         sor = sor+r->chars;
@@ -750,14 +750,14 @@ static BOOL willChange(HTStyle * style, NXRun *r)
     int sob;
     unsigned char * p;
     BOOL found_newline = NO;
-    
+
     if (pos>=textLength) return textLength;
-    
+
     for(block=firstTextBlock, sob=0; sob+block->chars <=pos; block=block->next)
         sob = sob + block->chars;	// Find text block for pos
-    
+
     p = block->text+(pos-sob);		// Start part way through this one
-    
+
     while (block) {
         for(; p < block->text+block->chars; p++) {
             if (found_newline) {
@@ -772,7 +772,7 @@ static BOOL willChange(HTStyle * style, NXRun *r)
 	sob = sob + block->chars;	/* Move to next block */
         block = block->next;
 	if (block) p = block->text;
-	
+
     }
     return textLength;
 }
@@ -838,7 +838,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     NXRun *p;				/* Pointer to run being read	*/
     NXRun *w;				/* Pointer to run being written	*/
     NXRun *r;				/* Pointer to end of runs	*/
-    
+
     if (start == end) {
         apply(style, &typingRun);		/* Will this work? */
         if (TRACE) printf("Style applied to typing run\n");
@@ -847,7 +847,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 
 //	First we determine in which runs the first and last characters to
 //	be changed lie.
-   
+
     for (pos=0, s=theRuns->runs; pos+s->chars<=start;
     			pos = pos+((s++)->chars)) /*loop*/;
 /*	s points to run containing char after selection start */
@@ -858,34 +858,34 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     run_after_end = pos+e->chars;
 
     r = (NXRun *) (((char *)(theRuns->runs)) +theRuns->chunk.used);	/* The end*/
-    
+
     if (TRACE) {
         printf("Runs: used=%i, elt. size=%i, %i elts, total=%i\n",
     		theRuns->chunk.used, sizeof(*r), r - theRuns->runs,
-		(r-theRuns->runs)*sizeof(*r) );   
+		(r-theRuns->runs)*sizeof(*r) );
 	printf("    runs at %i, r=%i. textLength:%i, r ends at:%i\n",
 		theRuns->runs, r, textLength, pos);
     }
-    
-       
+
+
 //	Move up runs as necessary in order to make room for the splitting
 //	of the start and end runs into two.  We only do this if necessary.
 
     if (!willChange(style, s))
         start = run_before_start;	/* No run before is needed now */
     need_run_before = (start>run_before_start);
- 
-    if (!willChange(style, e)) 
+
+    if (!willChange(style, e))
         end = run_after_end;			/* No run after is needed now */
     need_run_after = (end < run_after_end);
 
     if (TRACE) printf(
     	"Run s=%i, starts at %i; changing (%i,%i); Run e=%i ends at %i\n",
-    	s-theRuns->runs, run_before_start, start, end, e-theRuns->runs, run_after_end); 
-    
+    	s-theRuns->runs, run_before_start, start, end, e-theRuns->runs, run_after_end);
+
     increase = need_run_after + need_run_before;
     if (increase) {
-        new_used = theRuns->chunk.used + increase*sizeof(*r);   
+        new_used = theRuns->chunk.used + increase*sizeof(*r);
 	if (new_used> theRuns->chunk.allocated) {
 	    NXRun* old = theRuns->runs;
 	    theRuns = (NXRunArray*)NXChunkGrow(&theRuns->chunk, new_used);
@@ -899,14 +899,14 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 	for (p=r-1; p>=e; p--) p[increase] = p[0];	/* Move up the runs after */
 	r = r+increase;					/* Point to after them 910212*/
 	/* p = e-1 */
-	
+
 	if (need_run_after) {
 	    e = e + increase-1;				/* Point last to be changed */
 	    e[0] = e[1];				/* Copy the last run */
 	    e[1].chars = run_after_end - end;
 	    e[0].chars = e[0].chars - e[1].chars;	/* Split the run into two */
 	}
-	
+
 	if (need_run_before) {
 	    for(;p>=s; p--) p[1] = p[0];		/* Move runs up, copying 1st*/
 	    s[0].chars = start - run_before_start;	/* Split the run into two */
@@ -918,10 +918,10 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 	    s++;		/* Move on to point to first run to be changed */
 	    if (!need_run_after) e++;			/* First to be changed */
 	}
-    	theRuns->chunk.used = new_used; 
-	
+    	theRuns->chunk.used = new_used;
+
     } /* end if increase */
-    
+
 //	We consider the bit of text which is to be styled, s thru e.
 //	We scan through, first, applying the style, until we find two runs which
 //	need to be merged.
@@ -930,7 +930,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     if (p==theRuns->runs) {
         apply(style, p++);		/* Don't merge with run -1! */
     }
-    
+
     for(; p<=e; p++) {
 	apply(style, p);
 	if (run_match(p,p-1)) {
@@ -957,10 +957,10 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 
     w++;					/* Point to next to be written */
     if (w<p) {					/* If any were moved, */
-	for(;p<r;) *w++ = *p++;			/* Move the following runs down */	
-    	theRuns->chunk.used = (char*)w - (char*)theRuns->runs; 
+	for(;p<r;) *w++ = *p++;			/* Move the following runs down */
+    	theRuns->chunk.used = (char*)w - (char*)theRuns->runs;
     }
-    
+
     [self calcLine];				/* Update line breaks */
     return [window display];				/* Update window */
 }
@@ -977,17 +977,17 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     int start, end;
     if (TRACE) printf("Applying style %i to (%i,%i)\n",
     		style, sp0.cp, spN.cp);
-    
+
     if (sp0.cp<0) {					/* No selection */
     	return [self applyStyle:style from:0 to:0];	/* Apply to typing run */
     }
-    
+
     if (!style) return nil;
 
     if ([self isEditable]) [window setDocEdited:YES];
     else return nil;
 
-    	
+
     start = sp0.cp;
     end = spN.cp;
     if (style->paragraph) {	/* Extend to an integral number of paras. */
@@ -1007,7 +1007,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     NXRun * r = theRuns->runs;
     int sor;
     NXRun old_run;
-    
+
     for (sor = 0; sor<=sp0.cp; sor = sor+((r++)->chars)) ;/* Find run after */
     old_run = *(r-1);			/* Point to run for start of selection */
 
@@ -1037,11 +1037,11 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 {
     NXRun * r = theRuns->runs;
     int sor;
-    
+
     for (sor = 0; sor<=sp0.cp; sor = sor+((r++)->chars)) ;/* Find run after */
     r--;				/* Run for start of selection */
     return HTStyleForRun(sheet, r);	/* for start of selection */
-    
+
 }
 
 
@@ -1056,7 +1056,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     NXRun * r = theRuns->runs;
     int sor;
     NXRunArray	newRuns;
-    
+
     for (sor = 0; sor<=sp0.cp; sor = sor+((r++)->chars)) ;/* Find run after */
     r--;					/* Run for start of selection */
     newRuns.runs[0] = *r;			/* Copy it */
@@ -1073,7 +1073,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 //	This method overrides the method of Text, so as to force a plain text
 //	hypertext to be monofont and fixed width.  Also, the window is updated.
 //
-- readText: (NXStream *)stream
+- readText: (NSStream *)stream
 {
 //    [self setMonoFont:YES];		Seems to leave it in a strange state
     [self setHorizResizable:YES];
@@ -1081,7 +1081,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
     [self setFont:[Font newFont:"Ohlfs" size:10.0]];	// @@ Should be XMP
     [super readText:stream];
     format = WWW_PLAINTEXT;				// Remember
-    
+
 #ifdef NOPE
     {
       NXRect frm;		/* Try this to get over "text strangeness" */
@@ -1100,7 +1100,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 //	This method overrides the method of Text, so as to force a plain text
 //	hypertext to be monofont and fixed width.  Also, the window is updated.
 //
-- readRichText: (NXStream *)stream
+- readRichText: (NSStream *)stream
 {
     id status =  [super readRichText:stream];
     [self adjustWindow];
@@ -1144,7 +1144,7 @@ BOOL run_match(NXRun* r1, NXRun *r2)
 
 /*	Globals for using many subroutines within a method
 */
-static NXStream		*sgmlStream;
+static NSStream		*sgmlStream;
 static HyperText * HT;				/* Pointer to self for C */
 
 //	Inputting from the text object:
@@ -1206,11 +1206,11 @@ static int		original_length; /* of text */
 // We therefore set it to zero! (This might have been something else -TBL)
 //
 void append_start_block()
-{	
+{
     NXTextBlock *previous_block=write_block;	/* to previous write block */
-    
+
     if (TRACE)printf("    Starting to append new block.\n");
-        
+
     lastRun = ((NXRun*) ((char*)HT->theRuns->runs +
     				HT->theRuns->chunk.used))-1;
     write_block = (NXTextBlock*)malloc(sizeof(*write_block));
@@ -1227,7 +1227,7 @@ void append_start_block()
     if (write_block->next) write_block->next->prior = write_block;
         else HT->lastTextBlock = write_block;
     previous_block->next = write_block;
-     
+
 
 }
 
@@ -1236,19 +1236,19 @@ void append_start_block()
 void append_begin()
 {
     if (TRACE)printf("Begin append to text.\n");
-    
+
     [HT setText:""];				// Delete everything there
-    original_length = HT->textLength; 
+    original_length = HT->textLength;
     if (TRACE) printf("Text now contains %i characters\n", original_length);
 
-        
+
     lastRun = ((NXRun*) ((char*)HT->theRuns->runs +
     			HT->theRuns->chunk.used))-1;
 
 //	Use the last existing text block:
 
     write_block = HT->lastTextBlock;
-    
+
 //	It seems that the Text object doesn't like to be empty: it always wants to
 //	have a newline in at leats. However, we need it seriously empty and so we
 //	forcible empty it. CalcLine will crash if called with it in this state.
@@ -1283,7 +1283,7 @@ void set_style(HTStyle *style)
         if (lastRun->chars) {
 	    int new_used = (((char *)(lastRun+2)) - (char*)HT->theRuns->runs);
 	    if (new_used > HT->theRuns->chunk.allocated) {
-	    	if (TRACE) printf("    HT: Extending runs.\n"); 
+	    	if (TRACE) printf("    HT: Extending runs.\n");
 		HT->theRuns = (NXRunArray*)NXChunkGrow(
 			&HT->theRuns->chunk, new_used);
 		lastRun = ((NXRun*) ((char*)HT->theRuns->runs +
@@ -1291,7 +1291,7 @@ void set_style(HTStyle *style)
 	    }
 	    lastRun[1]=lastRun[0];
 	    lastRun++;
-	    HT->theRuns->chunk.used = new_used; 
+	    HT->theRuns->chunk.used = new_used;
 	}
 	apply(style, lastRun);
 	lastRun->chars = 0;		/* For now */
@@ -1334,7 +1334,7 @@ void finish_output()
     if (lastRun->chars==0) {		/* Chop off last run */
         HT->theRuns->chunk.used= (char*)lastRun - (char*)HT->theRuns;
     }
-    
+
 //	calcLine requires that the last character be a newline!
     {
         unsigned char * p = HT->lastTextBlock->text +
@@ -1403,7 +1403,7 @@ void loadPlainText()
     			: [self anchor];
 
     style->anchor = a;
-    [(Anchor *)style->anchor isLastChild];	/* Put in correct order */	      
+    [(Anchor *)style->anchor isLastChild];	/* Put in correct order */
     if (*reference) {			/* Link only if href */
 	parsed_address = HTParse(reference, [nodeAnchor address], PARSE_ALL);
 	[(Anchor *)(style->anchor) linkTo: [Anchor newAddress:parsed_address]];
@@ -1472,16 +1472,16 @@ void loadPlainText()
     int originalStart = sp0.cp;
     int originalEnd = spN.cp;
     result = [super keyDown:theEvent];
-    
+
     {
 	int inserted = originalEnd-originalStart +
 			textLength-originalLength;
-	
+
 	if (TRACE) printf(
     "KeyDown, size(sel) %i (%i-%i)before, %i (%i-%i)after.\n",
 	    originalLength, originalStart, originalEnd,
 	    textLength, sp0.cp, spN.cp);
-	    
+
 	if (inserted>0) {
 	    NXRun * s;
 	    int pos;
@@ -1495,14 +1495,14 @@ void loadPlainText()
 		    printf(
 	    "HT: Strange: inserted %i at %i, start of run=%i !!\n",
 				    inserted, start, pos);
-				    
+
 	    if (s > theRuns->runs) {	/* ie s-1 is valid */
 		s->paraStyle = typingPara;	/* Repair damage to runs */
 		/* What about freeing the old paragraph style? @@ */
 		s->info = (s-1)->info;
 		s->rFlags.dummy = 1;	/* Pass on flag */
 	    }
-	    
+
 	}
     }
     return result;
@@ -1539,11 +1539,11 @@ void loadPlainText()
 	        printf(
 		"WWW: Strange: Typing run has bad anchor info.\n");
 	}
-	
+
 	typingRun = *s;		/* Copy run to be used for insertion */
 	run = *s;		/* save a copy */
     }
-    
+
     if (!run.rFlags.dummy) return [super keyDown:theEvent]; // OK!
 
     {
@@ -1552,9 +1552,9 @@ void loadPlainText()
 	int originalStart = sp0.cp;
 	int originalEnd = spN.cp;
 	result = [super keyDown:theEvent];
-	
+
 /* 	Does it really change? YES!
-*/    
+*/
 	if (TRACE) {
 	    if (typingRun.info != run.info) printf(
 		"Typing run info was %p, now %p !!\n",
@@ -1568,7 +1568,7 @@ void loadPlainText()
 	{
 	    int inserted = originalEnd-originalStart +
 	    		 textLength-originalLength;
-	    
+
 	    if (TRACE) printf(
 	"KeyDown, size(sel) %i (%i-%i)before, %i (%i-%i)after.\n",
 		originalLength, originalStart, originalEnd,
@@ -1587,7 +1587,7 @@ void loadPlainText()
 		    if (TRACE) printf(
 			"HT: Inserted %i at %i, in run starting at=%i\n",
 					inserted, start, pos);
-					
+
 		} else {	/* inserted stuff starts run */
 		    if (TRACE) printf ("Patching info from %d to %d\n",
 			    s->info, run.info);
@@ -1612,18 +1612,18 @@ void loadPlainText()
     int originalStart = sp0.cp;
     int originalEnd = spN.cp;
     Anchor * typingInfo;
-    
+
     result = [super paste:sender];		// Do the paste
-        
+
     {
 	int inserted = originalEnd-originalStart +
 			textLength-originalLength;
-	
+
 	if (TRACE) printf(
     "Paste, size(sel) %i (%i-%i)before, %i (%i-%i)after.\n",
 	    originalLength, originalStart, originalEnd,
 	    textLength, sp0.cp, spN.cp);
-	    
+
 	if (inserted>0) {
 	    NXRun *s, *r;
 	    int pos;
@@ -1635,18 +1635,18 @@ void loadPlainText()
 	    if (pos!=sp0.cp-inserted)
 		    printf("HT paste: Strange: insert@%i != run@%i !!\n",
 				    start, pos);
-				    
+
 	    if (s > theRuns->runs) typingInfo = (s-1)->info;
 	    else typingInfo = 0;
-	    
+
 	    for (r=s; pos+r->chars<sp0.cp; pos=pos+(r++)->chars) {
 	        r->paraStyle = HTStyleForRun(styleSheet, r)->paragraph;
 		r->info = typingInfo;
 	    }
-	    
+
 	}
     }
-    
+
     return result;
 }
 
